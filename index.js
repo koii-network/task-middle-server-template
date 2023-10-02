@@ -4,10 +4,23 @@ const { queuePost, queueCID } = require("./queue");
 const MongoClient = require("mongodb").MongoClient;
 require("dotenv").config();
 const saveTweetsToMongoDB = require("./api/saveTweetsToMongoDB");
-
 let round = 0;
+const app = require("./routes");
+const port = 3000;
 
 async function main() {
+
+
+  // Start the Express server
+  app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+  });
+
+
+  // await postData();
+}
+
+async function postData() {
   // Get submission list, max round, and round time from Koii
   const taskData = await getTaskData(process.env.TASK_ID);
 
@@ -20,8 +33,8 @@ async function main() {
     await saveTweetsToMongoDB(tweetList);
 
     /*     // POST data to server
-    let i = 0;
-    let result = await queuePost(tweetList, i); */
+  let i = 0;
+  let result = await queuePost(tweetList, i); */
     console.log("Operation complete, calling the function again.");
     main();
   } else {
