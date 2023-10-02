@@ -6,6 +6,7 @@ require("dotenv").config();
 const saveTweetsToMongoDB = require("./api/saveTweetsToMongoDB");
 let round = 0;
 taskId = process.env.TASK_ID;
+const server = require("./routes");
 
 async function main() {
   const getTaskDataWrapper = async (taskId, round) => {
