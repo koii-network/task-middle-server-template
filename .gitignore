@@ -52,3 +52,5 @@ jspm_packages/
 *.ntvs*
 *.njsproj
 *.sln
+
+.env

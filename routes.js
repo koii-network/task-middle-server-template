@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 
-
 // Define a basic route
 app.get("/", (req, res) => {
   res.send("Hello, World!");
@@ -9,7 +8,10 @@ app.get("/", (req, res) => {
 
 // Define the /keywords endpoint
 app.get("/keywords", (req, res) => {
-  res.json(["koii", "web3", "al_koii"]);
+  const wordsList = require("./top1000words.json");
+  const randomIndex = Math.floor(Math.random() * wordsList.length);
+
+  res.send(wordsList[randomIndex]);
 });
 
 module.exports = app;
