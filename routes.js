@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const PORT = 3000;
+const keywords = require("./keywords");
 
 // Define a basic route
 app.get("/", (req, res) => {
@@ -14,4 +16,8 @@ app.get("/keywords", (req, res) => {
   res.send(wordsList[randomIndex]);
 });
 
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+module.exports = app; // This is important if you want to import the server in another file.
