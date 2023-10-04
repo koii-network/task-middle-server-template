@@ -2,9 +2,13 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 const dotenv = require("dotenv");
+const cors = require("cors");
+
 dotenv.config();
 
 // Parse incoming request bodies in a middleware before your handlers
+app.use(cors());
+
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
