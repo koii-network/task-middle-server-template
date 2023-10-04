@@ -8,7 +8,6 @@ dotenv.config();
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-
 // Define a basic route
 app.get("/", (req, res) => {
   res.send("Hello, World!");
@@ -28,10 +27,13 @@ app.get("/keywords", (req, res) => {
 // Define the POST endpoint
 app.post("/get-secret", (req, res) => {
   console.log("SecretKey request received from client", req.body);
-  const key = "GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC";
-  const expectedValue = 2000000000;
+  /*   const key = "GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC";
+   */
+  const expectedValue = 1900000000;
+  const stakingKey = Object.keys(req.body)[0];
 
-  if (req.body[key] === expectedValue) {
+  if (req.body[stakingKey] >= expectedValue) {
+    console.log("looks good");
     res.json({ secretKey: process.env.SECRET_KEY });
   } else {
     res.status(400).json({ error: "Invalid data" });
