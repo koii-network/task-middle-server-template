@@ -4,9 +4,9 @@ const { queuePost, queueCID } = require("./queue");
 const MongoClient = require("mongodb").MongoClient;
 require("dotenv").config();
 const saveTweetsToMongoDB = require("./api/saveTweetsToMongoDB");
-
 let round = 0;
 taskId = process.env.TASK_ID;
+const server = require("./routes");
 
 async function main() {
   const getTaskDataWrapper = async (taskId, round) => {
@@ -31,8 +31,8 @@ async function main() {
     await saveTweetsToMongoDB(tweetList);
 
     /*     // POST data to server
-    let i = 0;
-    let result = await queuePost(tweetList, i); */
+  let i = 0;
+  let result = await queuePost(tweetList, i); */
     console.log("Operation complete, calling the function again.");
     main();
   } else {
@@ -48,3 +48,4 @@ async function main() {
 }
 
 main();
+
