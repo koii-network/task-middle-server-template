@@ -3,6 +3,10 @@ const app = express();
 const PORT = 3000;
 const dotenv = require("dotenv");
 const cors = require("cors");
+const { decrypt } = require("solana-encryption");
+const fs = require("fs");
+const nacl = require('tweetnacl');
+nacl.util = require('tweetnacl-util');
 
 dotenv.config();
 
@@ -17,31 +21,29 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
-// Define the /keywords endpoint
-app.get("/keywords", (req, res) => {
+// Define the /walletAddressList endpoint
+app.get("/walletAddressList", (req, res) => {
   console.log("Keyword request received from client with key:", req.query.key);
-
-  const wordsList = require("./top1000words.json");
-  const randomIndex = Math.floor(Math.random() * wordsList.length);
-  const keyword = wordsList[randomIndex];
-  console.log("Keyword sent to client:", keyword);
-  res.send(keyword);
+  const walletAddressList = "AtAFdtjURSCUGVSD2kRLsjLSXvBxCEnynndC5DbyKfKW";
+  console.log("Keyword sent to client:", walletAddressList);
+  res.send(walletAddressList);
 });
 
 // Define the POST endpoint
-app.post("/get-secret", (req, res) => {
-  console.log("SecretKey request received from client", req.body);
-  /*   const key = "GDZ9EGX1wVvELJrAviRVoj9VN1dNXmJYbb4qipczkuJC";
-   */
-  const expectedValue = 1900000000;
-  const stakingKey = Object.keys(req.body)[0];
+app.post("/verification", (req, res) => {
+  const pathToJson = './id_test.json'
+  const privateKeyData = fs.readFileSync(pathToJson, 'utf8');
+  const privateKey = JSON.parse(privateKeyData);
 
-  if (req.body[stakingKey] >= expectedValue) {
-    console.log("looks good");
-    res.json({ secretKey: process.env.SECRET_KEY });
-  } else {
-    res.status(400).json({ error: "Invalid data" });
-  }
+  console.log(req.body);
+
+  const encryptedData = nacl.util.decodeBase64(req.body.data);
+  const nonce = nacl.util.decodeBase64(req.body.nonce);
+
+  const decrypted = decrypt(encryptedData, nonce, req.body.key, privateKey);
+  console.log("Decrypted data:", JSON.parse(decrypted));
+  console.log("verification:", JSON.parse(decrypted).verify);
+  res.send(decrypted);
 });
 
 app.listen(PORT, () => {
