@@ -1,5 +1,6 @@
 //Imports
 const getTaskData = require("./helpers/getTaskData");
+const { Connection } = require("@_koii/web3.js");
 const { queueCID } = require("./queue");
 require("dotenv").config();
 
@@ -11,9 +12,11 @@ const taskId = process.env.TASK_ID;
  * Main function to retry the task data fetch until a new round is found
  */
 async function main() {
+  const connection = new Connection("https://mainnet.koii.network");
 
   const getTaskDataWrapper = async (taskId, round) => {
-    let wrappedTaskData = await getTaskData(taskId, round);
+    let wrappedTaskData = await getTaskData(connection, taskId, round);
+    console.log(wrappedTaskData);
     if (wrappedTaskData === false) {
       console.log("No new round found. Retrying in 60 seconds...");
       await new Promise((resolve) => setTimeout(resolve, 60000));
@@ -23,7 +26,11 @@ async function main() {
     }
   };
   
-  const taskData = await getTaskDataWrapper(taskId, round);
+  const taskData = await getTaskData(
+    connection,
+    taskId,
+    round
+  );
 
   if (round < taskData.maxRound) {
     round = taskData.maxRound;
