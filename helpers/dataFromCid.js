@@ -5,7 +5,7 @@ const storageClient = new KoiiStorageClient(undefined, undefined, false);
 async function fetchCidFromGetFile(cid, fileName) {
   try {
     const blob = await storageClient.getFile(cid, fileName);
-    console.log(blob);
+    // console.log(blob);
     const text = await blob.text(); // Convert Blob to text
     const data = JSON.parse(text); // Parse text to JSON
     // console.log(data);
@@ -39,13 +39,14 @@ async function directFetchCid(cid, fileName) {
 module.exports = async (cid, fileName, maxRetries = 2, retryDelay = 3000) => {
   // Get data from IPFS through Koii Storage getCID function
   const data = await fetchCidFromGetFile(cid, fileName);
+  // console.log(data);
   if (data) {
     return data;
   }
 
   // Get data from IPFS through our direct fetch from IPFS Gateway [Not Recommended]
-  const dataDirect = await directFetchCid(cid, fileName);
-  if (dataDirect) {
-    return dataDirect;
-  }
+  // const dataDirect = await directFetchCid(cid, fileName);
+  // if (dataDirect) {
+  //   return dataDirect;
+  // }
 };

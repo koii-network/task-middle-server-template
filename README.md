@@ -15,7 +15,7 @@ It uses a queuing system to manage concurrency and ensure efficient processing.
 
 ## Structure
 
-- **index.js**: Main entry point that orchestrates the fetching and posting processes.
+- **index.js**: Main entry point that fetch task data every 15 minutes and save it to mongoDB.
 - **queue.js**: Contains the logic for queuing the tasks, such as sending tweets and handling CID data and save data do mongoDB.
 - **server.js**: Server setup to interact with the running Task.
 
@@ -24,6 +24,9 @@ It uses a queuing system to manage concurrency and ensure efficient processing.
 
 - **async-await-queue**: For managing task concurrency.
 - **axios**: For making HTTP requests.
+- **@_koii/web3.js**: For interacting with the Koii blockchain.
+- **dotenv**: For managing environment variables.
+- **node-cron**: For scheduling the task data fetch.
 
 ## Usage
 
@@ -31,7 +34,7 @@ It uses a queuing system to manage concurrency and ensure efficient processing.
    Before running the project, make sure to install the required dependencies:
 
 ```bash
-yarn install
+yarn
 ```
 or
 
@@ -39,52 +42,41 @@ or
 npm install
 ```
 
-2. Configure Server and Tokens
-   Ensure that the server URL and any required tokens or headers are properly configured in the sendTweet function inside the api directory. To extract the data from IPFS, you need to provide the `SECRET_WEB3_STORAGE_KEY` in .env file. To post the data to the server, you need to provide the `USER_TOKEN` in .env file.
+2. Configure .env file
+   Ensure that the `TASK_ID` is properly configured in .env file. The mongoDB connection string is also required in .env file.
 
 3. Run the Project
    You can run the project by executing the following command:
 
 ```bash
+yarn start
+```
+or
+
+```
 npm run start
 ```
 
-This will start the process of fetching tweets, save them to mongoDB and posting them to the configured server.
-
-To test the project, you can use the following command:
-
-```bash
-npm run test
-```
-
- <!-- This will start a server that listen on localhost:3333 will receive the tweets and log them to the console. Then in `api/sendTweet.js` file, change the server url to locahost:3333. -->
-
-3. Run the server
-  To interact with running tasks and manage data reception:
-```bash
-npm run server
-```
-
-This starts the server and makes it available for receiving and processing data according to configured tasks.
+This will start the process of fetching task data every 15 minutes and save it to mongoDB.
 
 ## Functions
 ### index.js
-- **main()**: Keeps looping to get the latest task data and send it to queue.js to process
+- **main()**: Keeps fetching task data every 15 minutes and save it to mongoDB.
+
 ### queue.js
 - **queueCID(submissionList)**
   - Parameters:
     - **submissionList**: An array of submission data including CIDs.
-  - Description: Extracts tweet data from IPFS using the provided CIDs.
+  - Description: Extracts task data from IPFS using the provided CIDs.
+
 - **queuePost(tweetList, i)**
   - Parameters:
     - **tweetList**: An array of tweet data.
     - **i**: An index used for tracking the process.
   - Description: Handles the queuing and sending of tweets to the server.
+
 ### helpers/getTaskData.js
 - **getTaskData(taskID, round)**: Gets the task Data and wait for new round to load
+
 ### helpers/dataFromCid.js
 - **dataFromCid(cid, filename)**: Gets the content from both IPFS Storage SDK and direct accessing (as backup)
-  
-## Note
-
-Make sure that the server is configured to receive the data in the expected format and that all necessary headers, tokens, and timeouts are properly set.

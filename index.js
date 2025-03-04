@@ -1,48 +1,59 @@
 //Imports
 const getTaskData = require("./helpers/getTaskData");
-const { queueCID } = require("./queue");
+const storeData = require("./helpers/storeData");
+const dataFromCid = require("./helpers/dataFromCid");
+const { Connection } = require("@_koii/web3.js");
 require("dotenv").config();
 
 let round = 0;
 const taskId = process.env.TASK_ID;
-
+const INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 /**
- * Main function to retry the task data fetch until a new round is found
+ * Main function to fetch task data every 15 minutes
  */
 async function main() {
-
-  const getTaskDataWrapper = async (taskId, round) => {
-    let wrappedTaskData = await getTaskData(taskId, round);
-    if (wrappedTaskData === false) {
-      console.log("No new round found. Retrying in 60 seconds...");
-      await new Promise((resolve) => setTimeout(resolve, 60000));
-      return await getTaskDataWrapper(taskId, round);
-    } else {
-      return wrappedTaskData;
-    }
-  };
+  const connection = new Connection("https://mainnet.koii.network");
   
-  const taskData = await getTaskDataWrapper(taskId, round);
+  while (true) {
+    try {
+      const taskData = await getTaskData(connection, taskId, round);
+      if (taskData) {
+        await storeData(taskId, taskData.maxRound, taskData.submissions);
+        // Initialize array to store all CID data
+        const allSubmissionData = [];
+        const totalCids = taskData.submissions.length;
+        // Collect all CID data
+        for (let i = 0; i < taskData.submissions.length; i++) {
+          const cid = taskData.submissions[i];
+          console.log(`Fetching CID (${i + 1}/${totalCids}): ${cid}. Round: ${taskData.maxRound}`);
+          const data = await dataFromCid(cid, 'vote.json');
+          allSubmissionData.push(data);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
-  if (round < taskData.maxRound) {
-    round = taskData.maxRound;
-    console.log("Current round is", round, "...");
-    const submissionList = taskData.submissions
-    const tweetList = await queueCID(submissionList);
+        // Store all data in one operation
+        await storeData(taskId, taskData.maxRound, allSubmissionData);
+        console.log(`Data stored successfully at ${new Date().toISOString()}`);
+      }
+    } catch (error) {
+      console.error('Error in main loop:', error);
+    }
     
-    console.log("Operation complete, calling the function again.");
-    main();
-  } else {
-    //Each round time unit is roughly equivalent to 408 miliseconds
-    const roundTimeInMS = taskData.roundTime * 408;
-    console.log(
-      "No new round... Checking again in",
-      (roundTimeInMS / 60000).toFixed(2),
-      "Minutes"
-    );
-    setTimeout(main, roundTimeInMS);
+    // Wait for the next interval
+    await new Promise(resolve => setTimeout(resolve, INTERVAL));
   }
 }
 
-main();
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Gracefully shutting down...');
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('Gracefully shutting down...');
+  process.exit(0);
+});
+
+main().catch(console.error);
