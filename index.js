@@ -19,17 +19,17 @@ async function main() {
     try {
       const taskData = await getTaskData(connection, taskId, round);
       if (taskData) {
+        await storeData(taskId, taskData.maxRound, taskData.submissions);
         // Initialize array to store all CID data
         const allSubmissionData = [];
         const totalCids = taskData.submissions.length;
-        
         // Collect all CID data
         for (let i = 0; i < taskData.submissions.length; i++) {
           const cid = taskData.submissions[i];
-          console.log(`Fetching CID (${i + 1}/${totalCids}): ${cid}`);
+          console.log(`Fetching CID (${i + 1}/${totalCids}): ${cid}. Round: ${taskData.maxRound}`);
           const data = await dataFromCid(cid, 'vote.json');
           allSubmissionData.push(data);
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
         // Store all data in one operation
