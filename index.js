@@ -1,7 +1,7 @@
 //Imports
 const getTaskData = require("./helpers/getTaskData");
+const storeData = require("./helpers/storeData");
 const { Connection } = require("@_koii/web3.js");
-const { queueCID } = require("./queue");
 require("dotenv").config();
 
 let round = 0;
@@ -32,24 +32,8 @@ async function main() {
     round
   );
 
-  if (round < taskData.maxRound) {
-    round = taskData.maxRound;
-    console.log("Current round is", round, "...");
-    const submissionList = taskData.submissions
-    const tweetList = await queueCID(submissionList);
-    
-    console.log("Operation complete, calling the function again.");
-    main();
-  } else {
-    //Each round time unit is roughly equivalent to 408 miliseconds
-    const roundTimeInMS = taskData.roundTime * 408;
-    console.log(
-      "No new round... Checking again in",
-      (roundTimeInMS / 60000).toFixed(2),
-      "Minutes"
-    );
-    setTimeout(main, roundTimeInMS);
-  }
+  // console.log(taskData);
+  await storeData(taskId, taskData.maxRound, taskData.submissions);
 }
 
 main();

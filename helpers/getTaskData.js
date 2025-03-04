@@ -52,6 +52,7 @@ async function getTaskData(connection, taskID, round) {
   }
 
   return {
+    submissionFullList: taskState.submissions[maxRound - 1],
     submissions: submissionList,
     submitters: submitterList,
     maxRound: maxRound - 1,
