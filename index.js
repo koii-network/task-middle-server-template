@@ -21,12 +21,15 @@ async function main() {
       if (taskData) {
         // Initialize array to store all CID data
         const allSubmissionData = [];
+        const totalCids = taskData.submissions.length;
         
         // Collect all CID data
-        for (const cid of taskData.submissions) {
+        for (let i = 0; i < taskData.submissions.length; i++) {
+          const cid = taskData.submissions[i];
+          console.log(`Fetching CID (${i + 1}/${totalCids}): ${cid}`);
           const data = await dataFromCid(cid, 'vote.json');
           allSubmissionData.push(data);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
 
         // Store all data in one operation
